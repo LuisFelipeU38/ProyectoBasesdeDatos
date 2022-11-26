@@ -355,7 +355,6 @@ router.post('/comprar', function (req, res, next) {
     const id_carrito  = req.body.id_carrito;
     productoModel.getCarrito(id_carrito).then(results => {
     if (results) {
-        console.log(results[0].clienteId);
         const id_cliente = results[0].clienteId;
         productoModel.getCarritoProductos(id_carrito).then(resultsCarritoProductos => {
             if (resultsCarritoProductos) {
@@ -364,8 +363,12 @@ router.post('/comprar', function (req, res, next) {
                 productoModel.postOrden(id_cliente).then(resultsOrden => {
                     if (resultsOrden) {
                         console.log(resultsOrden);
-                        const id_orden = resultsOrden;
-                        carrito_productos.forEach(element => productoModel.postOrdenProductos(element.productId, element.cantidad, id_cliente, id_orden))
+                        const id_orden = resultsOrden.insertId;
+                        carrito_productos.forEach(element => {
+                            productoModel.postOrdenProductos(element.productoId, element.cantidad, id_cliente, id_orden);
+                            productoModel.deleteCarritoProductos(id_carrito,element.productoId);
+                        });
+                        return res.status(200).send("Orden Realizada con exito");
                     } else 
                     return res.status(200).send("No se pudo realizar la orden");
                 });

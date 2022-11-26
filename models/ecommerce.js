@@ -196,7 +196,7 @@ module.exports = {
     },
     getCarritoProductos(id_carrito) {
         return new Promise((resolve, reject) => {
-            conexion.query(`select p.titulo from carrito_productos cp JOIN productos p on cp.productoId = p.id JOIN carrito c on c.id = cp.carritoId
+            conexion.query(`select * from carrito_productos cp JOIN productos p on cp.productoId = p.id JOIN carrito c on c.id = cp.carritoId
             where c.id = ?;`,
                 [id_carrito],
                 (err, results) => {
@@ -220,6 +220,17 @@ module.exports = {
             createDateOrden = new Date()
             conexion.query(`insert into ordenes (clienteId, createdAt, estado) values (?, ?, 1)`,
                 [id_cliente, createDateOrden],
+                (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                });
+        });
+    },
+    postOrdenProductos(id_producto,cantidad,id_orden) {
+        return new Promise((resolve, reject) => {
+            createDateOrden = new Date()
+            conexion.query(`insert into ordenes_productos (productoId, ordenId, createdAt, cantidad) values (?, ?, ?, ?);`,
+                [id_producto,id_orden,createDateOrden,cantidad],
                 (err, results) => {
                     if (err) {
                         console.log("err=",err)
